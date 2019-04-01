@@ -19,4 +19,16 @@ abstract class AbstractController
     {
         $this->databaseManager = $databaseManager;
     }
+
+    /**
+     * @param array $errorMessages
+     * @return array
+     */
+    protected function error(array $errorMessages)
+    {
+        return [
+            'status' => 'error',
+            'messages' => $errorMessages
+        ];
+    }
 }

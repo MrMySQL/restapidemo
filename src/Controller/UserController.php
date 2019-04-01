@@ -5,6 +5,9 @@ namespace App\Controller;
 use App\Model\UserModel;
 use App\Service\DatabaseManager;
 use App\Service\Request;
+use App\Validation\Rule\ContainsFieldsRule;
+use App\Validation\UserDataValidator;
+use App\Validation\Validator;
 
 class UserController extends AbstractController
 {
@@ -24,40 +27,42 @@ class UserController extends AbstractController
         $this->userModel = $taskModel;
     }
 
-
+    //TODO DRY
     public function signUpAction(Request $request)
     {
-        //TODO implement Validator
-        if ($body = json_decode($request->getBody())) {
-            $email = $body->email;
-            $pass = $body->pass;
+        $body = json_decode($request->getBody(), true);
+
+        if ($body && UserDataValidator::getInstance()->validate($body)) {
+            $email = $body['email'];
+            $pass = $body['pass'];
         } else {
-            //TODO return unified error
+            return $this->error(UserDataValidator::getInstance()->getErrors());
         }
 
         try {
             $token = $this->userModel->signUp($email, $pass);
             return $token;
         } catch (\Exception $e) {
-            //TODO return unified error
+            return $this->error([$e->getMessage()]);
         }
     }
 
     public function signInAction(Request $request)
     {
-        //TODO implement Validator
-        if ($body = json_decode($request->getBody())) {
-            $email = $body->email;
-            $pass = $body->pass;
+        $body = json_decode($request->getBody(), true);
+
+        if ($body && UserDataValidator::getInstance()->validate($body)) {
+            $email = $body['email'];
+            $pass = $body['pass'];
         } else {
-            //TODO return unified error
+            return $this->error(UserDataValidator::getInstance()->getErrors());
         }
 
         try {
             $token = $this->userModel->signIn($email, $pass);
             return $token;
         } catch (\Exception $e) {
-            //TODO return unified error
+            return $this->error([$e->getMessage()]);
         }
     }
 }

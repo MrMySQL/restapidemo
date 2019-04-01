@@ -10,6 +10,9 @@ use App\Model\UserModel;
 use App\Service\DatabaseManager;
 use App\Service\Request;
 use App\Service\UserMapper;
+use App\Validation\Rule\PositiveIntRule;
+use App\Validation\TaskDataValidator;
+use App\Validation\Validator;
 
 class TaskController extends AbstractController
 {
@@ -37,16 +40,17 @@ class TaskController extends AbstractController
     public function newAction(Request $request)
     {
         if (!$this->isAuthorized($request)) {
-            return 'Auth failed';
+            return $this->error(['Auth failed']);
         }
 
-        //TODO implement Validator
-        if ($body = json_decode($request->getBody())) {
-            $title = $body->title;
-            $due = $body->due;
-            $priority = $body->priority;
+        $body = json_decode($request->getBody(), true);
+
+        if ($body && TaskDataValidator::getInstance()->validate($body)) {
+            $title = $body['title'];
+            $due = $body['due'];
+            $priority = $body['priority'];
         } else {
-            //TODO return unified error
+            return $this->error(TaskDataValidator::getInstance()->getErrors());
         }
 
         try {
@@ -54,11 +58,11 @@ class TaskController extends AbstractController
             $task = $this->taskModel->new($this->user->getId(), $title, $due, $priority);
             return $task->toArray();
         } catch (\Exception $e) {
-            //TODO return unified error
+            $this->error([$e->getMessage()]);
         }
     }
 
-    private function isAuthorized(Request $request)
+    private function isAuthorized(Request $request): bool
     {
         $userModel = new UserModel(new UserMapper($this->databaseManager));
 
@@ -73,7 +77,7 @@ class TaskController extends AbstractController
     public function getTasksAction(Request $request)
     {
         if (!$this->isAuthorized($request)) {
-            return 'Auth failed';
+            return $this->error(['Auth failed']);
         }
 
         $tasks = $this->taskModel->getTasks($this->user->getId(), $request->getParameters());
@@ -88,33 +92,41 @@ class TaskController extends AbstractController
     public function markDoneAction(Request $request)
     {
         if (!$this->isAuthorized($request)) {
-            return 'Auth failed';
+            return $this->error(['Auth failed']);
         }
 
-        //TODO implement Validator
-        if ($body = json_decode($request->getBody())) {
-            $id = $body->id;
+        $body = json_decode($request->getBody(), true);
+
+        if (
+            $body && isset($body['id'])
+            && Validator::getInstance()->setRules([new PositiveIntRule()])->validate($body['id'])
+        ) {
+            $id = $body['id'];
         } else {
-            //TODO return unified error
+            return $this->error(['No such id']);
         }
 
-        return $this->taskModel->done($id);
+        return $this->taskModel->done($id) ? true : $this->error(['Failed']);
 
     }
 
     public function deleteAction(Request $request)
     {
         if (!$this->isAuthorized($request)) {
-            return 'Auth failed';
+            return $this->error(['Auth failed']);
         }
 
-        //TODO implement Validator
-        if ($body = json_decode($request->getBody())) {
-            $id = $body->id;
+        $body = json_decode($request->getBody(), true);
+
+        if (
+            $body && isset($body['id'])
+            && Validator::getInstance()->setRules([new PositiveIntRule()])->validate($body['id'])
+        ) {
+            $id = $body['id'];
         } else {
-            //TODO return unified error
+            return $this->error(['No such id']);
         }
 
-        return $this->taskModel->delete($id);
+        return $this->taskModel->delete($id) ? true : $this->error(['Failed']);
     }
 }
