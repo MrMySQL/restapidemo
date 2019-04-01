@@ -4,6 +4,7 @@ namespace App\Service;
 
 //TODO implement Repository pattern (Doctrine way)
 use App\Entity\User;
+use App\Model\TaskModel;
 
 class DatabaseManager
 {
@@ -174,9 +175,13 @@ class DatabaseManager
 
         $orderDirection = isset($parameters[Request::PARAM_ORDER_DIR])
             && in_array(strtolower($parameters[Request::PARAM_ORDER_DIR]), ['asc', 'desc'])
+            && $orderBy != 'id'
             ? $parameters[Request::PARAM_ORDER_DIR] : 'asc';
 
-        $q = $this->connection->prepare('SELECT * FROM `tasks` WHERE `user` = :userid ORDER BY ' . $orderBy . ' ' . $orderDirection);
+        $page = isset($parameters[Request::PARAM_PAGE_NUMBER]) && is_numeric($parameters[Request::PARAM_PAGE_NUMBER])
+            ? $parameters[Request::PARAM_PAGE_NUMBER] : 1;
+
+        $q = $this->connection->prepare('SELECT * FROM `tasks` WHERE `user` = :userid ORDER BY ' . $orderBy . ' ' . $orderDirection . ' LIMIT ' . ($page-1)*TaskModel::ON_PAGE . ', ' . TaskModel::ON_PAGE);
 
         $q->execute([':userid' => $userId]);
 

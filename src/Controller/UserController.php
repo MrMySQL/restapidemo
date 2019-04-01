@@ -2,12 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Model\UserModel;
 use App\Service\DatabaseManager;
 use App\Service\Request;
-use App\Validation\Rule\ContainsFieldsRule;
 use App\Validation\UserDataValidator;
-use App\Validation\Validator;
 
 class UserController extends AbstractController
 {
@@ -33,8 +32,8 @@ class UserController extends AbstractController
         $body = json_decode($request->getBody(), true);
 
         if ($body && UserDataValidator::getInstance()->validate($body)) {
-            $email = $body['email'];
-            $pass = $body['pass'];
+            $email = $body[User::FIELD_EMAIL];
+            $pass = $body[User::FIELD_PASSWORD];
         } else {
             return $this->error(UserDataValidator::getInstance()->getErrors());
         }
@@ -52,8 +51,8 @@ class UserController extends AbstractController
         $body = json_decode($request->getBody(), true);
 
         if ($body && UserDataValidator::getInstance()->validate($body)) {
-            $email = $body['email'];
-            $pass = $body['pass'];
+            $email = $body[User::FIELD_EMAIL];
+            $pass = $body[User::FIELD_PASSWORD];
         } else {
             return $this->error(UserDataValidator::getInstance()->getErrors());
         }

@@ -6,6 +6,12 @@ class User
 {
     const SESSION_TTL = 60*60*24; //1 day in seconds
 
+    const FIELD_ID = 'id';
+    const FIELD_EMAIL = 'email';
+    const FIELD_PASSWORD = 'password';
+
+    const FIELDS_TO_CHECK = [self::FIELD_EMAIL, self::FIELD_PASSWORD];
+
     /**
      * @var int
      */
@@ -99,11 +105,11 @@ class User
         //TODO validate
 
         $user = new self(
-            $data['email']
+            $data[self::FIELD_EMAIL]
         );
 
-        $user->id = $data['id'];
-        $user->pass = $data['password'];
+        $user->id = $data[self::FIELD_ID];
+        $user->pass = $data[self::FIELD_PASSWORD];
 
         return $user;
     }

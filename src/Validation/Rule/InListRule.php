@@ -25,6 +25,6 @@ class InListRule implements RuleInterface
 
     public function getError(): string
     {
-        return 'Unknown attribute';
+        return 'Not allowed value';
     }
 }

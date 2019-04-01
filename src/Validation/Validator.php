@@ -16,7 +16,7 @@ class Validator implements ValidatorInterface
     /**
      * @var bool
      */
-    private $isValid = true;
+    protected $isValid = true;
 
     /**
      * @var RuleInterface[]
@@ -29,13 +29,15 @@ class Validator implements ValidatorInterface
      */
     public function validate($value): bool
     {
-        $this->errors = [];
+//        $this->errors = [];
         foreach ($this->rules as $rule) {
             if (!$rule->isValid($value)) {
                 $this->isValid = false;
                 $this->errors[] = $rule->getError();
             }
         }
+
+        return $this->isValid;
     }
 
     /**
@@ -45,11 +47,15 @@ class Validator implements ValidatorInterface
 
     public static function getInstance(): ValidatorInterface
     {
-        if (null === static::$instance) {
-            static::$instance = new static();
+        static $instances = array();
+
+        $calledClass = get_called_class();
+
+        if (!isset($instances[$calledClass])) {
+            $instances[$calledClass] = new $calledClass();
         }
 
-        return static::$instance;
+        return $instances[$calledClass];
     }
 
     private function __construct()

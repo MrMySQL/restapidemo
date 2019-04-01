@@ -9,6 +9,8 @@ use App\Service\TaskMapper;
 
 class TaskModel
 {
+    const ON_PAGE = 5;
+
     /**
      * @var Task
      */
@@ -30,13 +32,8 @@ class TaskModel
 
     public function new(int $userId, string $title, \DateTimeInterface $due, int $priority): Task
     {
-        try {
             $this->task = $this->dataMapper->createTask($userId, $title, $due, $priority);
-
             return $this->task;
-        } catch (\Exception $e) {
-            //TODO
-        }
     }
 
     /**

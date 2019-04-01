@@ -24,7 +24,7 @@ class TaskMapper extends DataMapper
         if (!empty($taskData)) {
             return $this->mapRowToTask($taskData);
         } else {
-            throw new \Exception('Fail');
+            throw new \Exception('Task creating failed');
         }
     }
 

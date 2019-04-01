@@ -4,16 +4,16 @@
 namespace App\Validation\Rule;
 
 
-class EmailRule implements RuleInterface
+class NotEmpty implements RuleInterface
 {
 
     public function isValid($value): bool
     {
-        return filter_var($value, FILTER_VALIDATE_EMAIL);
+        return is_string($value) && strlen($value) > 0;
     }
 
     public function getError(): string
     {
-        return 'Invalid email';
+        return 'Empty value';
     }
 }

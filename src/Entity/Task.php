@@ -6,6 +6,23 @@ namespace App\Entity;
 
 class Task
 {
+    const FIELD_ID = 'id';
+    const FIELD_TITLE = 'title';
+    const FIELD_DUE = 'due';
+    const FIELD_PRIORITY = 'priority';
+    const FIELD_DONE = 'done';
+    const FIELDS_TO_CHECK = [self::FIELD_TITLE, self::FIELD_DUE, self::FIELD_PRIORITY];
+
+    const PRIORITY_LOW = 'low';
+    const PRIORITY_NORMAL = 'normal';
+    const PRIORITY_HIGH = 'high';
+
+    const PRIORITY_ALLOWED = [
+        self::PRIORITY_LOW => 1,
+        self::PRIORITY_NORMAL => 2,
+        self::PRIORITY_HIGH => 3
+    ];
+
     /**
      * @var int
      */
@@ -85,13 +102,13 @@ class Task
         //TODO validate
 
         $task = new self(
-            $data['title']
+            $data[self::FIELD_TITLE]
         );
 
-        $task->id = $data['id'];
-        $task->due = $data['due'];
-        $task->priority = $data['priority'];
-        $task->done = $data['done'];
+        $task->id = $data[self::FIELD_ID];
+        $task->due = $data[self::FIELD_DUE];
+        $task->priority = $data[self::FIELD_PRIORITY];
+        $task->done = $data[self::FIELD_DONE];
 
         return $task;
     }
@@ -99,11 +116,11 @@ class Task
     public function toArray()
     {
         return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'due' => $this->due,
-            'priority' => $this->priority,
-            'done' => $this->done,
+            self::FIELD_ID => $this->id,
+            self::FIELD_TITLE => $this->title,
+            self::FIELD_DUE => $this->due,
+            self::FIELD_PRIORITY => array_search($this->priority, self::PRIORITY_ALLOWED),
+            self::FIELD_DONE => $this->done,
         ];
     }
 }

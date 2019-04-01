@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 
+use App\Entity\Task;
 use App\Entity\User;
 use App\Model\TaskModel;
 use App\Model\UserModel;
@@ -46,9 +47,9 @@ class TaskController extends AbstractController
         $body = json_decode($request->getBody(), true);
 
         if ($body && TaskDataValidator::getInstance()->validate($body)) {
-            $title = $body['title'];
-            $due = $body['due'];
-            $priority = $body['priority'];
+            $title = $body[Task::FIELD_TITLE];
+            $due = $body[Task::FIELD_DUE];
+            $priority = Task::PRIORITY_ALLOWED[$body[Task::FIELD_PRIORITY]];
         } else {
             return $this->error(TaskDataValidator::getInstance()->getErrors());
         }
@@ -89,6 +90,7 @@ class TaskController extends AbstractController
         return $tasks;
     }
 
+    //TODO DRY
     public function markDoneAction(Request $request)
     {
         if (!$this->isAuthorized($request)) {
@@ -98,10 +100,10 @@ class TaskController extends AbstractController
         $body = json_decode($request->getBody(), true);
 
         if (
-            $body && isset($body['id'])
-            && Validator::getInstance()->setRules([new PositiveIntRule()])->validate($body['id'])
+            $body && isset($body[Task::FIELD_ID])
+            && Validator::getInstance()->setRules([new PositiveIntRule()])->validate($body[Task::FIELD_ID])
         ) {
-            $id = $body['id'];
+            $id = $body[Task::FIELD_ID];
         } else {
             return $this->error(['No such id']);
         }
@@ -119,10 +121,10 @@ class TaskController extends AbstractController
         $body = json_decode($request->getBody(), true);
 
         if (
-            $body && isset($body['id'])
-            && Validator::getInstance()->setRules([new PositiveIntRule()])->validate($body['id'])
+            $body && isset($body[Task::FIELD_ID])
+            && Validator::getInstance()->setRules([new PositiveIntRule()])->validate($body[Task::FIELD_ID])
         ) {
-            $id = $body['id'];
+            $id = $body[Task::FIELD_ID];
         } else {
             return $this->error(['No such id']);
         }

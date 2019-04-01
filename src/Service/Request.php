@@ -8,6 +8,7 @@ class Request
 {
     const PARAM_ORDER_BY = 'orderby';
     const PARAM_ORDER_DIR = 'direction';
+    const PARAM_PAGE_NUMBER = 'page';
 
     /**
      * @var string
