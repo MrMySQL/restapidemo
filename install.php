@@ -1,6 +1,6 @@
 <?php
 
-require_once('Autoloader.php');
+require_once('autoloader.php');
 require_once('config/config.php');
 
 use App\Service\DatabaseConfiguration;
