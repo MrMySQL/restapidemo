@@ -20,16 +20,28 @@ class UserMapper extends DataMapper
     /**
      * @param string $email
      * @return User
+     * @throws \Exception
      */
     public function findByEmail(string $email): User
     {
         $result = $this->databaseManager->findUserByEmail($email);
 
-        if ($result === null) {
-            throw new \InvalidArgumentException("User not found");
+        if (empty($result)) {
+            throw new \Exception("User not found");
         }
 
-        return $this->mapRowToUser($result);
+        return $this->mapRowToUser($result[0]);
+    }
+
+    public function findByToken(string $token): User
+    {
+        $result = $this->databaseManager->getUserByToken($token);
+
+        if (empty($result)) {
+            throw new \Exception("User not found");
+        }
+
+        return $this->mapRowToUser($result[0]);
     }
 
     /**
@@ -38,7 +50,7 @@ class UserMapper extends DataMapper
      * @return User
      * @throws \Exception
      */
-    public function createUser(string $email, string $pass)
+    public function createUser(string $email, string $pass): User
     {
         $result = $this->databaseManager->createUser($email, $pass);
 

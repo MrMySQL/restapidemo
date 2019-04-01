@@ -1,5 +1,12 @@
 <?php
 /**
+ *
+ *
+ * PSR-4 official example. Taken from
+ * https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader-examples.md
+ *
+ *
+ *
  * An example of a project-specific implementation.
  *
  * After registering this autoload function with SPL, the following line

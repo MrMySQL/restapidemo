@@ -5,7 +5,7 @@ namespace App\Model;
 use App\Entity\User;
 use App\Service\UserMapper;
 
-class UserModel extends AbstractModel
+class UserModel
 {
     /**
      * @var User
@@ -16,6 +16,15 @@ class UserModel extends AbstractModel
      * @var UserMapper
      */
     private $dataMapper;
+
+    /**
+     * UserModel constructor.
+     * @param UserMapper $dataMapper
+     */
+    public function __construct(UserMapper $dataMapper)
+    {
+        $this->dataMapper = $dataMapper;
+    }
 
     /**
      * @return User
@@ -38,8 +47,12 @@ class UserModel extends AbstractModel
 
     public function signUp(string $email, string $pass): string
     {
-        if ($this->dataMapper->findByEmail($email)) {
-            throw new \Exception('User already exists');
+        try {
+            $this->user = $this->dataMapper->findByEmail($email);
+
+            throw new \Exception('User already exists.');
+        } catch (\Exception $e) {
+            //User does not exists. It's ok.
         }
 
         $this->user = $this->dataMapper->createUser($email, $pass);
@@ -47,20 +60,21 @@ class UserModel extends AbstractModel
         return $this->dataMapper->getToken($this->user->getId());
     }
 
-    public function signIn(string $email, string $pass)
+    public function signIn(string $email, string $pass): string
     {
-        if ($this->dataMapper->findByEmail($email) and $this->user->getPass() == md5($pass)) {
+        $this->user = $this->dataMapper->findByEmail($email);
+
+        if ($this->user && $this->user->getPass() == md5($pass)) {
             return $this->dataMapper->getToken($this->user->getId());
         } else {
             throw new \Exception('Authentication failed');
         }
     }
 
-    /**
-     * @param UserMapper $dataMapper
-     */
-    public function setDataMapper(UserMapper $dataMapper): void
+    public function authorize(string $token): User
     {
-        $this->dataMapper = $dataMapper;
+        $this->user = $this->dataMapper->findByToken($token);
+
+        return $this->user;
     }
 }

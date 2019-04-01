@@ -11,6 +11,8 @@ class DatabaseManager
     const TABLE_NAME_TASKS = 'tasks';
     const TABLE_NAME_SESSIONS = 'sessions';
 
+    const TASK_SORT_AVAILABLE = ['title', 'due', 'priority'];
+
     /**
      * @var DatabaseConfiguration
      */
@@ -78,10 +80,10 @@ class DatabaseManager
   CONSTRAINT `user_tasks` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;');
 
-        $connection->exec('CREATE TABLE IF NOT EXISTS `sessions` (
+        $connection->exec('CREATE TABLE `sessions` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user` int(11) unsigned NOT NULL,
-  `token` int(11) NOT NULL,
+  `token` varchar(255) NOT NULL DEFAULT \'\',
   `created` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user` (`user`),
@@ -108,16 +110,16 @@ class DatabaseManager
     public function createUser(string $email, string $pass): bool
     {
         $q = $this->connection->prepare('INSERT INTO `users` (`email`, `password`) VALUES (:email, :pass)');
-        return $q->execute(['email' => $email, 'pass' => md5($pass)]);
+        return $q->execute([':email' => $email, ':pass' => md5($pass)]);
     }
 
     public function getUserByToken(string $token)
     {
         $q = $this->connection->prepare(
-            'SELECT `user` FROM `sessions` WHERE `token` = ? AND TIMESTAMPDIFF(SECOND, `created`, NOW()) < ?');
+            'SELECT u.* FROM `users` u LEFT JOIN `sessions` s ON u.id = s.user WHERE s.token = ? AND TIMESTAMPDIFF(SECOND, s.`created`, NOW()) < ?');
         $q->execute([$token, User::SESSION_TTL]);
         if ($data = $q->fetchAll()) {
-            return $this->findUserById($data['user']);
+            return $data;
         } else {
             throw new \Exception('Session expired');
         }
@@ -125,13 +127,69 @@ class DatabaseManager
 
     public function newToken(int $userId): string
     {
-        $q = $this->connection->prepare('INSERT INTO `sessions` (`user`, `token`, `created`) VALUES (:user, :token, NOW())');
+        $q = $this->connection->prepare('INSERT INTO `sessions` (`user`, `token`, `created`) VALUES (:userid, :token, NOW())');
         $token = uniqid();
 
-        if ($q->execute(['user' => $userId, 'token' => $token])) {
+        if ($q->execute([':userid' => $userId, ':token' => $token])) {
             return $token;
         } else {
             throw new \Exception('Session creating failed');
         }
+    }
+
+    public function createTask(int $userId, string $title, \DateTimeInterface $due, int $priority)
+    {
+        $q = $this->connection->prepare('INSERT INTO `tasks` (`user`, `title`, `due`, `priority`) VALUES (:userid, :title, :due, :priority)');
+        $r = $q->execute(
+            [
+                ':userid' => $userId,
+                ':title' => $title,
+                ':due' => $due->format("Y-m-d H:i:s"),
+                ':priority' => $priority
+            ]
+        );
+
+        if ($r) {
+            $q = $this->connection->query('SELECT LAST_INSERT_ID()');
+            $q->execute();
+            return $q->fetchAll();
+        } else {
+            throw new \Exception('Task creating failed');
+        }
+    }
+
+    public function getTaskById(int $id)
+    {
+        $q = $this->connection->prepare('SELECT * FROM `tasks` WHERE `id` = ?');
+        $q->execute([$id]);
+
+        return $q->fetch();
+    }
+
+    public function getTasks(int $userId, array $parameters)
+    {
+        $orderBy = isset($parameters[Request::PARAM_ORDER_BY])
+            && in_array(strtolower($parameters[Request::PARAM_ORDER_BY]), self::TASK_SORT_AVAILABLE)
+            ? $parameters[Request::PARAM_ORDER_BY] : 'id';
+
+        $orderDirection = isset($parameters[Request::PARAM_ORDER_DIR])
+            && in_array(strtolower($parameters[Request::PARAM_ORDER_DIR]), ['asc', 'desc'])
+            ? $parameters[Request::PARAM_ORDER_DIR] : 'asc';
+
+        $q = $this->connection->prepare('SELECT * FROM `tasks` WHERE `user` = :userid ORDER BY ' . $orderBy . ' ' . $orderDirection);
+
+        $q->execute([':userid' => $userId]);
+
+        return $q->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function taskDone(int $id): bool
+    {
+        return $this->connection->query('UPDATE `tasks` SET `done` = 1 WHERE `id` = ' . $id)->execute();
+    }
+
+    public function taskDelete(int $id): bool
+    {
+        return $this->connection->query('DELETE FROM `tasks` WHERE `id` = ' . $id)->execute();
     }
 }
