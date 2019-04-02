@@ -1,7 +1,5 @@
 # rest api demo
 
-## Auth Methods
-
 ### Sign Up
 
 #### Path
@@ -180,4 +178,16 @@ true
 Returns true or false in case of error. Actually returns true even if ID does not exist.
 ```
 true
+```
+
+### Error response example
+Every response can return an error having next template:
+```
+{
+  "status": "error",
+  "messages": [
+    "Message one",
+    "Message two"
+  ]
+}
 ```
