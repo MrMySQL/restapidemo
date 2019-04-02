@@ -15,11 +15,11 @@ require_once('config/config.php');
 require_once('autoloader.php');
 
 $dbc = new DatabaseConfiguration(
-    CONFIG_DB_HOST,
-    CONFIG_DB_NAME,
-    CONFIG_DB_USER,
-    CONFIG_DB_PASS,
-    CONFIG_DB_TYPE
+    getenv('CONFIG_DB_HOST'),
+    getenv('CONFIG_DB_NAME'),
+    getenv('CONFIG_DB_USER'),
+    getenv('CONFIG_DB_PASS'),
+    getenv('CONFIG_DB_TYPE')
 );
 $databaseManager = new DatabaseManager($dbc);
 
