@@ -179,8 +179,8 @@ class DatabaseManager
             && $orderBy != 'id'
             ? $parameters[Request::PARAM_ORDER_DIR] : 'asc';
 
-        $page = isset($parameters[Request::PARAM_PAGE_NUMBER]) && is_numeric($parameters[Request::PARAM_PAGE_NUMBER])
-            ? $parameters[Request::PARAM_PAGE_NUMBER] : 1;
+        $pn = $parameters[Request::PARAM_PAGE_NUMBER];
+        $page = isset($pn) && is_numeric($pn) && $pn > 0 ? $pn : 1;
 
         $q = $this->connection->prepare('SELECT * FROM `tasks` WHERE `user` = :userid ORDER BY ' . $orderBy . ' ' . $orderDirection . ' LIMIT ' . ($page-1)*TaskModel::ON_PAGE . ', ' . TaskModel::ON_PAGE);
 
