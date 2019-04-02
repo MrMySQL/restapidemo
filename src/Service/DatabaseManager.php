@@ -30,14 +30,14 @@ class DatabaseManager
     public function __construct(DatabaseConfiguration $config)
     {
         $this->configuration = $config;
-        $this->connection = new \PDO('mysql:host=' . $config->getHost() . ';dbname=' . $config->getDbname(),
+        $this->connection = new \PDO($config->getType() . ':host=' . $config->getHost() . ';dbname=' . $config->getDbname(),
             $config->getUsername(), $config->getPassword());
     }
 
     public static function install(DatabaseConfiguration $config)
     {
-        $connection = new \PDO('mysql:host=' . $config->getHost(),
-            $config->getUsername(), $config->getPassword());;
+        $connection = new \PDO($config->getType() . ':host=' . $config->getHost(),
+            $config->getUsername(), $config->getPassword());
 
         try {
             self::createDatabase($connection, $config->getDbname());
