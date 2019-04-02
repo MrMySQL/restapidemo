@@ -12,7 +12,7 @@ use App\Service\TaskMapper;
 use App\Service\UserMapper;
 
 require_once('config/config.php');
-require_once('Autoloader.php');
+require_once('autoloader.php');
 
 $dbc = new DatabaseConfiguration(
     CONFIG_DB_HOST,
