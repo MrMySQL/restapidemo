@@ -190,11 +190,11 @@ class DatabaseManager
 
     public function taskDone(int $id): bool
     {
-        return $this->connection->query('UPDATE `tasks` SET `done` = 1 WHERE `id` = ' . $id)->execute();
+        return $this->connection->prepare('UPDATE `tasks` SET `done` = 1 WHERE `id` = ?')->execute([$id]);
     }
 
     public function taskDelete(int $id): bool
     {
-        return $this->connection->query('DELETE FROM `tasks` WHERE `id` = ' . $id)->execute();
+        return $this->connection->prepare('DELETE FROM `tasks` WHERE `id` = ?')->execute([$id]);
     }
 }
