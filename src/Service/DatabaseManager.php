@@ -70,16 +70,17 @@ class DatabaseManager
   UNIQUE KEY `unique_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;');
 
-        $connection->exec('CREATE TABLE IF NOT EXISTS `tasks` (
+        $connection->exec('CREATE TABLE `tasks` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user` int(11) unsigned NOT NULL,
   `title` varchar(255) NOT NULL DEFAULT \'\',
   `due` datetime NOT NULL,
-  `priority` int(11) NOT NULL,
+  `priority` int(11) unsigned NOT NULL DEFAULT \'1\',
+  `done` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_tasks` (`user`),
   CONSTRAINT `user_tasks` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;');
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;');
 
         $connection->exec('CREATE TABLE `sessions` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
